@@ -1,1 +1,1 @@
-# rabbitmq-cloudant
+# akmakm bot
