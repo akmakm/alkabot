@@ -1,0 +1,25 @@
+{
+#  "RabbitMQ_settings" 
+    "RABBITMQ_HOST" : "rabbit",
+    "RABBITMQ_PORT" : "5672",
+    "RABBITMQ_USERNAME" : "guest",
+    "RABBITMQ_PASSWORD" : "guest",
+    "RABBITMQ_VIRTUAL_HOST" : "/",
+
+#  "Tmp settings"
+    "TMP_FOLDER" : "/tmp",
+
+#  "Cloud settings"
+    "CLOUD_URI" : "",
+    "CLOUD_USERNAME" : "",
+    "CLOUD_PASSWORD" : "",
+  
+#  "Log settings" 
+    "NORMAL_LOG" : "alka.norm.log",
+    "NORMAL_LOG_NUM" : "10",
+    "NORMAL_LOG_SIZE" : "1000000",
+    "NORMAL_LOG_INTERVAL" : "5000",
+    "ERROR_LOG" : "alka.err.log",
+    "ERROR_LOG_NUM" : "10",
+    "ERROR_LOG_SIZE" : "1000000"
+}
