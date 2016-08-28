@@ -29,5 +29,5 @@ fi
 
 CP=$(cat .mvn-classpath)
 ECHODEBUG "alka4: CP=" $CP
-java -cp $TARGET:$CP com.github.alka.main.Main "$@"
-ECHODEBUG "alka5: exit"
+java -cp $TARGET:$CP com.github.akmakm.main.Main "$@"
+ECHODEBUG "alka5: exit" $?

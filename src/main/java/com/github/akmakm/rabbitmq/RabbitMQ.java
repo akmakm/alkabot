@@ -1,5 +1,6 @@
 package com.github.akmakm.rabbitmq;
 
+import static com.github.akmakm.config.Constants.*;
 import com.github.akmakm.main.Log;
 
 import java.io.IOException;
@@ -47,35 +48,6 @@ public class RabbitMQ extends Observable {
 
     private static Channel mychannel;
     
-    /** 
-     * Predefined exchange and queue names.
-     */
-    protected static final String DEFAULT_EXCHANGE = "";
-    public static final String RESIZE_QUEUE = "resizeQueue";
-    public static final String UPLOAD_QUEUE = "uploadQueue";
-    public static final String DONE_QUEUE = "doneQueue";
-    public static final String FAILED_QUEUE = "failedQueue";
-    
-    /** tbd
-     * Queue to consume.
-     */
-    private String queue;
-    
-    /**tbd
-     * Name of backup queue, or {@code null} if queue should not be backed up.
-     */
-    private String backupQueue;
-
-    /**tbd
-     * Name of error queue, or {@code null} if no error queue.
-     */
-    private String errorQueue;
-
-    /**
-     * Whether to verify timestamp unit. If not, assumes nanoseconds.
-     */
-    private boolean verifyTimestamp = false;
-
     /**
      * Log.
      */
@@ -161,39 +133,6 @@ public class RabbitMQ extends Observable {
         }
 
         /**
-         * Sets queue to consume.
-         *
-         * @param queue queue
-         * @return this builder
-         */
-        public Builder setQueue(String queue) {
-            internal.queue = queue;
-            return this;
-        }
-
-        /**
-         * Sets error queue.
-         *
-         * @param errorQueue error queue
-         * @return this builder
-         */
-        public Builder setErrorQueue(String errorQueue) {
-            internal.errorQueue = errorQueue;
-            return this;
-        }
-
-        /**
-         * Whether to verify the timestamp unit. Defaults to false.
-         *
-         * @param verifyTimestamp whether to verify timestamp
-         * @return this builder
-         */
-        public Builder setVerifyTimestamp(boolean verifyTimestamp) {
-            internal.verifyTimestamp = verifyTimestamp;
-            return this;
-        }
-
-        /**
          * Log. If not set, this object will not log messages.
          *
          * @param log log
@@ -239,7 +178,6 @@ public class RabbitMQ extends Observable {
             }
 
             // Declare appropriate queues
-            //alka tbd channel.queueDeclarePassive(queue);
             System.err.println("alka 004.3 - declare queues");
             internal.mychannel.queueDeclare(RESIZE_QUEUE
                                            ,true, false, false, null);
@@ -254,11 +192,6 @@ public class RabbitMQ extends Observable {
         }
     }
     
-    /**
-     * Parses RabbitMQ payload strings.
-     */
-//    private RabbitMQParser parser;
-
     /**
      * Instantiates RabbitMQ.
      */
@@ -298,42 +231,6 @@ public class RabbitMQ extends Observable {
         }
     }
     
-    /**
-     * Starts consuming data from RabbitMQ.
-     *
-     * @throws IOException error connecting to RabbitMQ
-     * @throws TimeoutException error connecting to RabbitMQ
-     */
-    public void consume() throws IOException, TimeoutException {
-        
-        // Consumer
-        System.err.println("alka 006.1 - consumer");
-//        Consumer consumer = new DefaultConsumer(mychannel) {
-//            @Override
-//            public void handleDelivery(String consumerTag, Envelope envelope,
-//                                AMQP.BasicProperties properties, byte[] body)
-//                throws IOException {
-//                if (log != null) {
-//                    log.rabbitRead();
-//                }
-//                // Notify observers
-//                setChanged();
-//                String payload = new String(body);
-//                try {
-//                    notifyObservers(parser.parse(payload));
-//                } catch (Exception e) {
-//                    // Publish erronous payloads to error queue, if any
-//                    boolean backed = false;
-//                    if (errorQueue != null) {
-//                        mychannel.basicPublish("", errorQueue, null, body);
-//                        backed = true;
-//                    }
-//                    log.rabbitError(payload, e);
-//                }
-//            }
-//        };
-    }
-
     public void printStatus () {
         System.out.println("Images Processor Bot"+'\n'
                           +"Queue:Count");
@@ -384,7 +281,6 @@ public class RabbitMQ extends Observable {
             }
             try {
                 // Try to reconnect
-                consume();
                 log.rabbitReconnectSuccess(this);
                 return;
             } catch (Exception e) {
@@ -400,8 +296,6 @@ public class RabbitMQ extends Observable {
         return String.format("[RabbitMQ:%n"
             + "host=%s%n"
             + "port=%d%n"
-            + "virtualHost=%s%n"
-            + "queue=%s%n"
-            + "backupQueue=%s]", host, port, virtualHost, queue, backupQueue);
+            + "virtualHost=%s%n", host, port, virtualHost);
     }
 }

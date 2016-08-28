@@ -1,27 +1,19 @@
 package com.github.akmakm.main;
 
+import com.github.akmakm.config.Configuration;
+import static com.github.akmakm.config.Constants.*;
 import com.github.akmakm.rabbitmq.RabbitMQ;
-import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.DefaultConsumer;
+import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Envelope;
-import java.io.File;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import com.dropbox.core.DbxAppInfo;
-import com.dropbox.core.DbxAuthFinish;
-import com.dropbox.core.DbxClient;
-import com.dropbox.core.DbxEntry;
-import com.dropbox.core.DbxException;
-import com.dropbox.core.DbxRequestConfig;
-import com.dropbox.core.DbxWebAuthNoRedirect;
-import com.dropbox.core.DbxWriteMode;
-import java.io.FileInputStream;
+import com.google.api.client.http.FileContent;
+import com.google.api.services.drive.model.*;
+import com.google.api.services.drive.Drive;
 import java.io.FileNotFoundException;
-import java.io.InputStreamReader;
-import java.util.Locale;
+import java.io.IOException;
+import java.util.logging.*;
 
 /**
  * An uploading tool
@@ -30,13 +22,11 @@ import java.util.Locale;
  */
 public class Uploader extends DefaultConsumer implements Runnable {
 
-    public static final int ENTIRE_QUEUE = -1;
-    private int myCount = ENTIRE_QUEUE;
+    private int myCount = CONSUME_ALL;
     private final RabbitMQ myRabbit;
-    final String DROP_BOX_APP_KEY = "APPKEY";
-    final String DROP_BOX_APP_SECRET = "SECRETKEY";
-    final String myCode;
-
+    private final Drive myDrive;
+    private final Configuration myConfig;
+    
     /**
      * DefaultConsumer constructor is prohibited
      *
@@ -44,22 +34,47 @@ public class Uploader extends DefaultConsumer implements Runnable {
      */
     private Uploader(Channel rabbitChannel) {
         super(rabbitChannel);
-        myCount = -1;
+        myCount = 0;
         myRabbit = null;
-        myCode = null;
+        myDrive = null;
+        myConfig = null;
     }
 
     /**
      * Constructor gets a rabbit channel and the images count to upload
      *
      * @param rabbit
+     * @param gDrive
      * @param count
+     * @param config
      */
-    public Uploader (RabbitMQ rabbit, int count, String code) {
+    public Uploader (RabbitMQ rabbit
+            , Drive gDrive
+            , int count
+            , Configuration config) {
         super(RabbitMQ.getChannel());
         myRabbit = rabbit;
-        myCount = count;
-        myCode = code;
+        myDrive = gDrive;
+        myConfig = config;
+        // Count items in the queue to process
+        try {
+            myCount = getChannel()
+                     .queueDeclarePassive(RESIZE_QUEUE)
+                     .getMessageCount();
+        } catch (IOException ex) {
+            Logger.getLogger(Resizer.class.getName()).log(Level.SEVERE, null, ex);
+            myCount = 0;
+        }
+        if (count == CONSUME_ALL) {
+            // count is equal to the queue length
+        } else if (count > 0) {
+            // Up to count, but no more than there are in the queue
+            myCount = Math.min(count, myCount);
+        } else {
+            // Some negative value was given, nothing to do
+            myCount = 0;
+        }
+        System.out.println("alkaUpl: constructor - counted "+myCount+" items to upload");
     }
 
     /**
@@ -76,38 +91,67 @@ public class Uploader extends DefaultConsumer implements Runnable {
             Envelope envelope,
             AMQP.BasicProperties properties,
             byte[] body) throws IOException {
+        long deliveryTag = envelope.getDeliveryTag();
         boolean resultSuccess = false;
+        if (--myCount < 0) {
+            getChannel().basicAck (deliveryTag, false);
+            System.exit(ERR_UNEXPECTED_UPLOAD_ITEM);
+        }
         try {
-            System.err.println("alkaUpl hd1:  new File("+new String(body)+");");
+            System.err.println("alkaUpl hd11:  new File("+new String(body)+");");
             // find image on disk
-            File fileIn = new File(new String(body));
+            java.io.File fileIn = new java.io.File(new String(body));
             if (!fileIn.canRead()) {
-                System.err.println("alkaUpl hd3a:  cannotread "+fileIn.getName());
+                System.err.println("alkaUpl hd13a:  cannot read "+fileIn.getName());
+            } else {
+                System.err.println("alkaUpl hd13b:  read "+fileIn.getName());
+                resultSuccess = doUpload (fileIn);
             }
-            System.err.println("alkaUpl hd3b:  read "+fileIn.getName());
-            resultSuccess = doUpload (fileIn, myCode);
         } catch (Exception ex1) {
-            System.err.println("alkaUpl hd3b:  problem with accessing files or"
-                    + "creating an images_resized folder, exception \""
+            System.err.println("alkaUpl hd13b:  problem with accessing files or"
+                    + "uploading an image, exception \""
                     + ex1.getMessage() + "\"");
         }
-        // Move to next queue
+
+        // Acknowledge and move to next queue
+        getChannel().basicAck (deliveryTag, true);
         if (resultSuccess) {
-            myRabbit.putToQueue(myRabbit.DONE_QUEUE, new String(body));
+            myRabbit.putToQueue(DONE_QUEUE, new String(body));
         } else {
-            myRabbit.putToQueue(myRabbit.FAILED_QUEUE, new String(body));
+            myRabbit.putToQueue(FAILED_QUEUE, new String(body));
         }
-        int remainingMessages = getChannel()
-                .queueDeclarePassive(myRabbit.RESIZE_QUEUE)
-                .getMessageCount();
-        if (remainingMessages == 0
-                || --myCount == 0) {
-            System.out.println("alkaUpl: exiting (remainingMessages="
-                    + remainingMessages
+        if (myCount == 0) {
+            System.out.println("alkaUpl: exiting \n"
                     + ", myCount="
                     + myCount);
-            System.exit(0);
+            System.exit(NO_ERROR);
         }
+    }
+
+    /**
+     * Upload function
+     */
+    private boolean doUpload(java.io.File fileUp) throws 
+            FileNotFoundException
+            , IOException {
+              
+        // File's metadata.
+        File body = new File();
+        body.setTitle(fileUp.getName());
+        body.setDescription(fileUp.getPath());
+        body.setMimeType("image/jpeg");
+        // File's content.
+        FileContent mediaContent = new FileContent("image/jpeg", fileUp);
+        try {
+            File file = myDrive.files().insert(body, mediaContent).execute();
+            // Uncomment the following line to print the File ID.
+            // System.out.println("File ID: " + file.getId());
+            return true;
+        } catch (IOException e) {
+            System.err.println("An error occured: " + e);
+            return false;
+        }
+
     }
 
     /**
@@ -115,46 +159,14 @@ public class Uploader extends DefaultConsumer implements Runnable {
      */
     @Override
     public void run() {
+        boolean autoAck = false;
         try {
-            getChannel().basicConsume(myRabbit.RESIZE_QUEUE, true, this);
+            getChannel().basicConsume(UPLOAD_QUEUE, autoAck, this);
         } catch (IOException ex) {
             Logger.getLogger(Resizer.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    private boolean doUpload(File fileUp, String code) throws FileNotFoundException, IOException {
-        try {
-            String rootDir = fileUp.getPath();
-            DbxAppInfo dbxAppInfo = new DbxAppInfo(DROP_BOX_APP_KEY, DROP_BOX_APP_SECRET);
-            
-            DbxRequestConfig reqConfig = new DbxRequestConfig("javarootsDropbox/1.0",
-                    Locale.getDefault().toString());
-            DbxWebAuthNoRedirect webAuth = new DbxWebAuthNoRedirect(reqConfig, dbxAppInfo);
-            
-            String authorizeUrl = webAuth.start();
-            DbxAuthFinish authFinish = webAuth.finish(code);
-            String accessToken = authFinish.accessToken;
-            DbxClient client = new DbxClient(reqConfig, accessToken);
-            
-            System.out.println("account name is : " + client.getAccountInfo().displayName);
-            FileInputStream inputStream = new FileInputStream(fileUp);
-            try {
-                
-                DbxEntry.File uploadedFile = client.uploadFile(rootDir,
-                        DbxWriteMode.add(), fileUp.length(), inputStream);
-//                String sharedUrl = client.createShareableUrl(fileUp);
-                System.out.println("Uploaded: " + uploadedFile.toString() + " URL " 
-                        + fileUp.getPath());
-            } catch (IOException ex) {
-                Logger.getLogger(Uploader.class.getName()).log(Level.SEVERE, null, ex);
-            } finally {
-                inputStream.close();
-            }
-        }   catch (DbxException ex) {
-            Logger.getLogger(Uploader.class.getName()).log(Level.SEVERE, null, ex);
-            return false;
-        }
-        return true;
-    }
+    
     
 }

@@ -1,25 +1,33 @@
 {
-#  "RabbitMQ_settings" 
+    "installed":
+      {"client_id":"206335124163-jcest0gjch200lm7lg8ccuf6eao0vap1.apps.googleusercontent.com",
+       "project_id":"ethereal-runner-141605",
+       "auth_uri":"https://accounts.google.com/o/oauth2/auth",
+       "token_uri":"https://accounts.google.com/o/oauth2/token",
+       "auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs",
+       "client_secret":"Jw6REhS0qkF8Nru7DjKU6aH5",
+       "redirect_uris":
+         ["urn:ietf:wg:oauth:2.0:oob",
+          "http://localhost"]
+      },
+    "CLOUD_URI" : "",
+    "USER_CODE" : "FpuXqCv0O2oAAAAAAAAANTeOgIAsej_KPEHX-_RfO-s",
+    "GOOAPI_CLIENTID" : "206335124163-jcest0gjch200lm7lg8ccuf6eao0vap1.apps.googleusercontent.com ",
+
     "RABBITMQ_HOST" : "rabbit",
     "RABBITMQ_PORT" : "5672",
     "RABBITMQ_USERNAME" : "guest",
     "RABBITMQ_PASSWORD" : "guest",
     "RABBITMQ_VIRTUAL_HOST" : "/",
-
-#  "Tmp settings"
-    "TMP_FOLDER" : "/tmp",
-
-#  "Cloud settings"
-    "CLOUD_URI" : "",
-    "CLOUD_USERNAME" : "",
-    "CLOUD_PASSWORD" : "",
-  
-#  "Log settings" 
+     
     "NORMAL_LOG" : "alka.norm.log",
     "NORMAL_LOG_NUM" : "10",
     "NORMAL_LOG_SIZE" : "1000000",
     "NORMAL_LOG_INTERVAL" : "5000",
     "ERROR_LOG" : "alka.err.log",
     "ERROR_LOG_NUM" : "10",
-    "ERROR_LOG_SIZE" : "1000000"
+    "ERROR_LOG_SIZE" : "1000000",
+
+    "TMP_FOLDER" : "/tmp"
+
 }
