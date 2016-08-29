@@ -40,12 +40,6 @@ public interface Constants {
             + "  resize Resize next images from the queue\n" 
             + "  status Output current status in format %queue%:%number_of_images%\n" 
             + "  upload Upload next images to remote storage";
-    static final String TODO_LIST =
-            "\n 3. retry command" 
-            + "\n 5. unify loggers" 
-            + "\n 6. callback port for credentials"
-            + "\n 7. replace consumer with basicGet"
-            + "\n 8. Corrupted color in resize kartomin.png";
 
     static final int NOTHING_TO_DO = 0;
     static final int DO_SHOW_STATUS = 1;
@@ -61,6 +55,10 @@ public interface Constants {
     
     // error codes
     static final int NO_ERROR = 0;
+    static final int ERR_CONFIGURATION_PROBLEM = 11;
+    static final int ERR_MALFORMED_PARAMETERS = 12;
+    static final int ERR_FILES_NOT_ACCESSIBLE = 21;
     static final int ERR_UNEXPECTED_RESIZE_ITEM = 31;
     static final int ERR_UNEXPECTED_UPLOAD_ITEM = 41;
+
 }

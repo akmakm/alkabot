@@ -13,7 +13,6 @@ import com.google.api.services.drive.model.*;
 import com.google.api.services.drive.Drive;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.logging.*;
 
 /**
  * An uploading tool
@@ -56,25 +55,7 @@ public class Uploader extends DefaultConsumer implements Runnable {
         myRabbit = rabbit;
         myDrive = gDrive;
         myConfig = config;
-        // Count items in the queue to process
-        try {
-            myCount = getChannel()
-                     .queueDeclarePassive(RESIZE_QUEUE)
-                     .getMessageCount();
-        } catch (IOException ex) {
-            Logger.getLogger(Resizer.class.getName()).log(Level.SEVERE, null, ex);
-            myCount = 0;
-        }
-        if (count == CONSUME_ALL) {
-            // count is equal to the queue length
-        } else if (count > 0) {
-            // Up to count, but no more than there are in the queue
-            myCount = Math.min(count, myCount);
-        } else {
-            // Some negative value was given, nothing to do
-            myCount = 0;
-        }
-        System.out.println("alkaUpl: constructor - counted "+myCount+" items to upload");
+        myCount = count;
     }
 
     /**
@@ -97,33 +78,30 @@ public class Uploader extends DefaultConsumer implements Runnable {
             getChannel().basicAck (deliveryTag, false);
             System.exit(ERR_UNEXPECTED_UPLOAD_ITEM);
         }
+        java.io.File fileIn = new java.io.File(new String(body));
         try {
-            System.err.println("alkaUpl hd11:  new File("+new String(body)+");");
             // find image on disk
-            java.io.File fileIn = new java.io.File(new String(body));
             if (!fileIn.canRead()) {
-                System.err.println("alkaUpl hd13a:  cannot read "+fileIn.getName());
+                System.err.println("Uploader:  cannot read "+fileIn.getName());
             } else {
-                System.err.println("alkaUpl hd13b:  read "+fileIn.getName());
                 resultSuccess = doUpload (fileIn);
             }
-        } catch (Exception ex1) {
-            System.err.println("alkaUpl hd13b:  problem with accessing files or"
+        } catch (Exception ex) {
+            System.err.println("Uploader:  problem with accessing files or"
                     + "uploading an image, exception \""
-                    + ex1.getMessage() + "\"");
+                    + ex.getMessage() + "\"");
+            ex.printStackTrace(System.err);
         }
 
         // Acknowledge and move to next queue
         getChannel().basicAck (deliveryTag, true);
         if (resultSuccess) {
+            System.out.println("Uploader: done "+fileIn.getAbsolutePath());
             myRabbit.putToQueue(DONE_QUEUE, new String(body));
         } else {
             myRabbit.putToQueue(FAILED_QUEUE, new String(body));
         }
         if (myCount == 0) {
-            System.out.println("alkaUpl: exiting \n"
-                    + ", myCount="
-                    + myCount);
             System.exit(NO_ERROR);
         }
     }
@@ -147,8 +125,9 @@ public class Uploader extends DefaultConsumer implements Runnable {
             // Uncomment the following line to print the File ID.
             // System.out.println("File ID: " + file.getId());
             return true;
-        } catch (IOException e) {
-            System.err.println("An error occured: " + e);
+        } catch (IOException ex) {
+            System.err.println("Uploader: An error occured: " + ex.getMessage());
+            ex.printStackTrace(System.err);
             return false;
         }
 
@@ -163,7 +142,8 @@ public class Uploader extends DefaultConsumer implements Runnable {
         try {
             getChannel().basicConsume(UPLOAD_QUEUE, autoAck, this);
         } catch (IOException ex) {
-            Logger.getLogger(Resizer.class.getName()).log(Level.SEVERE, null, ex);
+            System.err.println("Uploader:  failed to start consuming from the queue");
+            ex.printStackTrace(System.err);
         }
     }
 

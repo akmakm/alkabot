@@ -11,8 +11,6 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 
 /**
@@ -46,25 +44,7 @@ public class Resizer extends DefaultConsumer implements Runnable {
             , int count) {
         super(rabbit.getChannel());
         myRabbit = rabbit;
-        // Count items in the queue to process
-        try {
-            myCount = getChannel()
-                     .queueDeclarePassive(RESIZE_QUEUE)
-                     .getMessageCount();
-        } catch (IOException ex) {
-            Logger.getLogger(Resizer.class.getName()).log(Level.SEVERE, null, ex);
-            myCount = 0;
-        }
-        if (count == CONSUME_ALL) {
-            // count is equal to the queue length
-        } else if (count > 0) {
-            // Up to count, but no more than there are in the queue
-            myCount = Math.min(count, myCount);
-        } else {
-            // Some negative value was given, nothing to do
-            myCount = 0;
-        }
-        System.out.println("alkaRes: constructor - counted "+myCount+" items to resize");
+        myCount = count;
     }
 
     /**
@@ -86,10 +66,9 @@ public class Resizer extends DefaultConsumer implements Runnable {
         boolean resultSuccess = false;
         if (--myCount < 0) {
             getChannel().basicAck (deliveryTag, false);
+            System.err.println("Error - unexpected resize request");
             System.exit(ERR_UNEXPECTED_RESIZE_ITEM);
         }
-        System.err.println("alkaRes hd1.1:  new File("+new String(body)
-                +"); myCount=="+myCount);
         File fileIn = new File(new String(body));
         // scale image on disk
         String dirOutName = fileIn.getParent()
@@ -100,25 +79,21 @@ public class Resizer extends DefaultConsumer implements Runnable {
         
         try {
             if (! dirOut.exists()) {
-                System.err.println("alkaRes hd: creating "+dirOutName);
+                System.err.println("Resizer: creating "+dirOutName);
                 dirOut.mkdir();
             }
             if (!fileIn.canRead()) {
-                System.err.println("alkaRes hd3a:  cannot read "+fileIn.getName());
+                System.err.println("Resizer:  cannot read "+fileIn.getName());
             } else {
-                System.err.println("alkaRes hd3b:  read "+fileIn.getName());
                 BufferedImage originalImage = ImageIO.read(fileIn);
                 int type = originalImage.getType() == 0 ? BufferedImage.TYPE_INT_ARGB
                     : originalImage.getType();
-                System.err.println("alkaRes hd4:  fileIn read ok");
                 BufferedImage resizedImageJpg = resizeImage(fileIn);
-                System.err.println("alkaRes hd5:  resize ok");
                 ImageIO.write(resizedImageJpg, "jpg", fileOut);
-                System.err.println("alkaRes hd6:  written ok");
                 resultSuccess = true;
             }
         } catch (SecurityException ex1) {
-            System.err.println("alkaRes hd3b:  problem with accessing files or"
+            System.err.println("Resizer:  problem with accessing files or"
                     + "creating an images_resized folder, exception \""
                     + ex1.getMessage() + "\"");
             ex1.printStackTrace(System.err);
@@ -127,14 +102,13 @@ public class Resizer extends DefaultConsumer implements Runnable {
         // Acknowledge and move to next queue
         getChannel().basicAck (deliveryTag, true);
         if (resultSuccess) {
+            System.out.println("Resizer: done "+fileIn.getAbsolutePath());
+            fileIn.delete();
             myRabbit.putToQueue(UPLOAD_QUEUE, fileOut.getAbsolutePath());
         } else {
             myRabbit.putToQueue(FAILED_QUEUE, new String(body));
         }
         if (myCount == 0) {
-            System.out.println("alkaRes: exiting \n"
-                    + ", myCount="
-                    + myCount);
             System.exit(NO_ERROR);
         }
     }
@@ -182,7 +156,8 @@ public class Resizer extends DefaultConsumer implements Runnable {
         try {
             getChannel().basicConsume(RESIZE_QUEUE, autoAck, this);
         } catch (IOException ex) {
-            Logger.getLogger(Resizer.class.getName()).log(Level.SEVERE, null, ex);
+            System.err.println("Resizer: failed to start consuming from the queue");
+            ex.printStackTrace(System.err);
         }
     }
 

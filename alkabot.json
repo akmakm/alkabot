@@ -1,4 +1,5 @@
 {
+    "CLOUD_TYPE" : "google",
     "installed":
       {"client_id":"206335124163-jcest0gjch200lm7lg8ccuf6eao0vap1.apps.googleusercontent.com",
        "project_id":"ethereal-runner-141605",
@@ -10,9 +11,6 @@
          ["urn:ietf:wg:oauth:2.0:oob",
           "http://localhost"]
       },
-    "CLOUD_URI" : "",
-    "USER_CODE" : "FpuXqCv0O2oAAAAAAAAANTeOgIAsej_KPEHX-_RfO-s",
-    "GOOAPI_CLIENTID" : "206335124163-jcest0gjch200lm7lg8ccuf6eao0vap1.apps.googleusercontent.com ",
 
     "RABBITMQ_HOST" : "rabbit",
     "RABBITMQ_PORT" : "5672",
@@ -20,14 +18,6 @@
     "RABBITMQ_PASSWORD" : "guest",
     "RABBITMQ_VIRTUAL_HOST" : "/",
      
-    "NORMAL_LOG" : "alka.norm.log",
-    "NORMAL_LOG_NUM" : "10",
-    "NORMAL_LOG_SIZE" : "1000000",
-    "NORMAL_LOG_INTERVAL" : "5000",
-    "ERROR_LOG" : "alka.err.log",
-    "ERROR_LOG_NUM" : "10",
-    "ERROR_LOG_SIZE" : "1000000",
-
     "TMP_FOLDER" : "/tmp"
 
 }
