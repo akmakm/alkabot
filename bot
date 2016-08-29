@@ -1,0 +1,33 @@
+#!/usr/bin/sh
+alias ECHODEBUG=">&2 echo > /dev/null"
+
+if [ -z $1 ] ; then
+  echo >&2 "\
+  Uploader Bot
+  Usage:
+    command [arguments]
+  Available commands:
+    schedule Add filenames to resize queue
+    resize Resize next images from the queue
+    status Output current status in format %queue%:%number_of_images%
+    upload Upload next images to remote storage"
+  exit 0
+fi
+
+ECHODEBUG "alka0: finding classes..."
+
+TARGET=$(ls target/*.jar 2>/dev/null)
+ECHODEBUG  "alka1: TARGET=" $TARGET
+if [ -z "$TARGET" ]; then
+    >&2 echo "Error: No jar file in target/, try 'mvn package'".
+    exit 1
+fi
+if [ ! ".mvn-classpath" -nt pom.xml ]; then
+  ECHODEBUG  "alka3: mvn dependency:build-classpath"
+  mvn dependency:build-classpath -Dmdep.outputFile=.mvn-classpath -q
+fi
+
+CP=$(cat .mvn-classpath)
+ECHODEBUG "alka4: CP=" $CP
+java -cp $TARGET:$CP com.github.akmakm.main.Main "$@"
+ECHODEBUG "alka5: exit" $?
