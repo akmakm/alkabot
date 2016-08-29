@@ -1,4 +1,4 @@
-#!/usr/bin/sh
+#!/bin/sh
 alias ECHODEBUG=">&2 echo > /dev/null"
 
 if [ -z $1 ] ; then

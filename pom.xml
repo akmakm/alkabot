@@ -22,11 +22,6 @@
             <version>v2-rev234-1.22.0</version>
         </dependency>
         <dependency>
-            <groupId>com.dropbox.core</groupId>
-            <artifactId>dropbox-core-sdk</artifactId>
-            <version>1.7.7</version>
-        </dependency>
-        <dependency>
             <groupId>com.rabbitmq</groupId>
             <artifactId>amqp-client</artifactId>
             <version>3.6.4</version>

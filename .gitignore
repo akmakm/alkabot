@@ -1,4 +1,5 @@
-/alka.norm.log.0
-/alka.err.log.0
 /test/
 /bak/
+/target/classes/
+/target/maven-archiver/
+/target/test-classes/
