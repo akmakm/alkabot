@@ -1,6 +1,6 @@
 #!/bin/sh
 alias ECHODEBUG=">&2 echo > /dev/null"
-
+#alias ECHODEBUG=echo
 if [ -z $1 ] ; then
   echo >&2 "\
   Uploader Bot
@@ -16,18 +16,19 @@ fi
 
 ECHODEBUG "alka0: finding classes..."
 
-TARGET=$(ls target/*.jar 2>/dev/null)
+BASEDIR=$(dirname "$0")
+TARGET=$(ls $BASEDIR/target/*.jar 2>/dev/null)
 ECHODEBUG  "alka1: TARGET=" $TARGET
 if [ -z "$TARGET" ]; then
     >&2 echo "Error: No jar file in target/, try 'mvn package'".
     exit 1
 fi
-if [ ! ".mvn-classpath" -nt $TARGET ]; then
-  ECHODEBUG  "alka3: mvn dependency:build-classpath"
-  mvn dependency:build-classpath -Dmdep.outputFile=.mvn-classpath -q
-fi
+#if [ ! "$BASEDIR/.mvn-classpath" -nt $TARGET ]; then
+#  ECHODEBUG  "alka3: mvn dependency:build-classpath"
+#  mvn dependency:build-classpath -Dmdep.outputFile=$BASEDIR/.mvn-classpath -q
+#fi
 
-CP=$(cat .mvn-classpath)
+CP=$(cat $BASEDIR/.mvn-classpath)
 ECHODEBUG "alka4: CP=" $CP
 java -cp $TARGET:$CP com.github.akmakm.main.Main "$@"
 ECHODEBUG "alka5: exit" $?
