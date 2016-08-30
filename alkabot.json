@@ -12,7 +12,7 @@
           "http://localhost"]
       },
 
-    "RABBITMQ_HOST" : "rabbit",
+    "RABBITMQ_HOST" : "localhost",
     "RABBITMQ_PORT" : "5672",
     "RABBITMQ_USERNAME" : "guest",
     "RABBITMQ_PASSWORD" : "guest",

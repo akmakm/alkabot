@@ -144,11 +144,14 @@ public class RabbitMQ extends Observable {
             try {
                 internal.connection = factory.newConnection();
                 internal.mychannel = connection.createChannel();
-            } catch (IOException e) {
+            } catch (IOException | TimeoutException ex) {
+                System.err.println("Failed to connect to the RabbitMQ service"
+                                +" \nwith these parameters: host="+internal.host
+                                +" \n                       port="+internal.port
+                                +" \n                       user="+internal.username);
+                ex.printStackTrace(System.err);
                 throw new IOException("Couldn't connect to RabbitMQ");
-            } catch (TimeoutException e) {
-                throw new TimeoutException("Couldn't connect to RabbitMQ");
-            }
+            } 
 
             // Declare appropriate queues
             internal.mychannel.queueDeclare(RESIZE_QUEUE
