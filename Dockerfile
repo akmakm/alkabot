@@ -4,8 +4,7 @@ MAINTAINER Aleksandr Kartomin kartomin@gmail.com
 
 # Download bot 
 WORKDIR /usr/bin/akmakm
-RUN apt-get install -y git && \
-    git clone  https://github.com/akmakm/bot 
+RUN git clone https://github.com/akmakm/bot 
 RUN chmod +x bot/bot && \
     mv bot/entry_points/rabbitmq-start /usr/local/bin/
 
@@ -20,13 +19,14 @@ ENV MAVEN_HOME /usr/share/maven
 ENV MAVEN_CONFIG "$USER_HOME_DIR/.m2"
 RUN \
     mv bot/entry_points/mvn-entrypoint.sh /usr/local/bin/mvn-entrypoint.sh && \
-    mv bot/entry_points/settings-docker.xml /usr/share/maven/ref/
+    chmod +x /usr/local/bin/mvn-entrypoint.sh && \
+    mv bot/entry_points/settings-docker.xml /usr/share/maven/ref/ 
 VOLUME "$USER_HOME_DIR/.m2"
 ENTRYPOINT ["/usr/local/bin/mvn-entrypoint.sh"]
 
 # Build bot
 WORKDIR /usr/bin/akmakm/bot
-RUN mvn clean package
+RUN mvn package
     
 # Install RabbitMQ.
 RUN \
@@ -51,5 +51,5 @@ VOLUME ["/data/log", "/data/mnesia", "/tmp"]
 # Define CMD
 CMD ["bash", "--rcfile", "/usr/local/bin/rabbitmq-start"]
 
-EXPOSE 15671 15672 5672 25672
+EXPOSE 15671 15672 5672 36438
 
