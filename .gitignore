@@ -3,3 +3,5 @@
 /target/classes/
 /target/maven-archiver/
 /target/test-classes/
+/build.sh
+/hoho

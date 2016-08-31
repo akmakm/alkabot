@@ -23,10 +23,10 @@ if [ -z "$TARGET" ]; then
     >&2 echo "Error: No jar file in target/, try 'mvn package'".
     exit 1
 fi
-#if [ ! "$BASEDIR/.mvn-classpath" -nt $TARGET ]; then
-#  ECHODEBUG  "alka3: mvn dependency:build-classpath"
-#  mvn dependency:build-classpath -Dmdep.outputFile=$BASEDIR/.mvn-classpath -q
-#fi
+if [ ! "$BASEDIR/.mvn-classpath" -nt $TARGET ]; then
+  ECHODEBUG  "alka3: mvn dependency:build-classpath"
+  mvn dependency:build-classpath -Dmdep.outputFile=$BASEDIR/.mvn-classpath -q
+fi
 
 CP=$(cat $BASEDIR/.mvn-classpath)
 ECHODEBUG "alka4: CP=" $CP
