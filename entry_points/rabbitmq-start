@@ -1,5 +1,6 @@
 #!/bin/bash
 
 ulimit -n 1024
-chown -R rabbitmq:rabbitmq /data
-exec rabbitmq-server > rabbitmq.log $@ & 
+ls -lrta /data
+sudo chown -R user:rabbitmq /data
+exec rabbitmq-server > /tmp/rabbitmq.log $@ & 
