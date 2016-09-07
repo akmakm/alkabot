@@ -11,6 +11,7 @@
          ["urn:ietf:wg:oauth:2.0:oob",
           "http://localhost"]
       },
+    "CLOUD_USER_CODE" : "4/YysMNuZdZAn8uHPA1BV8UY0xjVQb-21BKrPNsRYLNM4" ,
 
     "RABBITMQ_HOST" : "localhost",
     "RABBITMQ_PORT" : "5672",

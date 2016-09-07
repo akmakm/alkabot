@@ -89,6 +89,9 @@ public class Resizer extends DefaultConsumer implements Runnable {
                 int type = originalImage.getType() == 0 ? BufferedImage.TYPE_INT_ARGB
                     : originalImage.getType();
                 BufferedImage resizedImageJpg = resizeImage(fileIn);
+            System.err.println("Resizer:  attempting ImageIO.write "
+                    + "(resizedImageJpg=" + resizedImageJpg
+                    + ", \"jpg\", fileOut=" + fileOut + ")");
                 ImageIO.write(resizedImageJpg, "jpg", fileOut);
                 resultSuccess = true;
             }

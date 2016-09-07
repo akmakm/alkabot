@@ -7,7 +7,10 @@ import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
@@ -42,19 +45,8 @@ public class Main {
 
     /** Global instance of the {@link FileDataStoreFactory}. */
     private static FileDataStoreFactory DATA_STORE_FACTORY;
-        /** Global instance of the JSON factory. */
-    private static final JsonFactory JSON_FACTORY =
-        JacksonFactory.getDefaultInstance();
     /** Global instance of the HTTP transport. */
     private static HttpTransport HTTP_TRANSPORT;
-    /** Global instance of the scopes required by this quickstart.
-     *
-     * If modifying these scopes, delete your previously saved credentials
-     * at ~/.credentials/drive-java-quickstart
-     */
-    private static final List<String> SCOPES =
-        Arrays.asList(DriveScopes.DRIVE_METADATA_READONLY
-                ,DriveScopes.DRIVE_FILE);
     /** Directory to store user credentials for this application. */
     private static java.io.File DATA_STORE_DIR;
 
@@ -255,19 +247,46 @@ public class Main {
         InputStream in = new FileInputStream(configFile);
         GoogleClientSecrets clientSecrets =
             GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
-
-        // Build flow and trigger user authorization request.
+        Credential credential;
         GoogleAuthorizationCodeFlow flow =
                 new GoogleAuthorizationCodeFlow.Builder(
                         HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
                 .setDataStoreFactory(DATA_STORE_FACTORY)
                 .setAccessType("offline")
                 .build();
-        LocalServerReceiver localReceiver = 
-                new LocalServerReceiver.Builder().setPort(36438).build();
-        Credential credential = new AuthorizationCodeInstalledApp(
-            flow, localReceiver).authorize("user");
+        System.err.println("oau, scopes="+flow.getScopesAsString());
+        // Read the authorization code from config
+        String authorizationCode = config.get(CLOUD_USER_CODE);
+        if (authorizationCode != null) {
+            System.err.println("oau, code="+authorizationCode);
 
+            // Authorize the OAuth2 token
+            GoogleAuthorizationCodeTokenRequest tokenRequest = flow
+                    .newTokenRequest(authorizationCode);
+            tokenRequest.setRedirectUri(clientSecrets
+                    .getInstalled()
+                    .getRedirectUris()
+                    .get(0));
+            System.err.println("oau, uri 0="+clientSecrets
+                    .getInstalled()
+                    .getRedirectUris()
+                    .get(0));
+            GoogleTokenResponse tokenResponse = tokenRequest.execute();
+            // Create the OAuth2 credential
+            System.err.println("oau, token="+tokenResponse.toString());
+            credential = new GoogleCredential
+                    .Builder().setTransport(HTTP_TRANSPORT)
+                    .setJsonFactory(JSON_FACTORY)
+                    .setClientSecrets(clientSecrets)
+                    .build();
+            // Set authorized credentials
+            credential.setFromTokenResponse(tokenResponse);
+        } else {
+            LocalServerReceiver localReceiver = 
+                new LocalServerReceiver.Builder().setPort(36438).build();
+            credential = new AuthorizationCodeInstalledApp(
+                flow, localReceiver).authorize("user");
+        }
         return credential;
     }
 

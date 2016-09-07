@@ -1,5 +1,11 @@
 package com.github.akmakm.config;
 
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.services.drive.DriveScopes;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  *
  * @author alka
@@ -19,6 +25,18 @@ public interface Constants {
      * Predefined configurable properties names for json config.
      */
     public static final String TMP_FOLDER = "TMP_FOLDER";
+    public static final String CLOUD_USER_CODE = "CLOUD_USER_CODE";
+            /** Global instance of the JSON factory. */
+    public static final JsonFactory JSON_FACTORY =
+        JacksonFactory.getDefaultInstance();
+    /** Global instance of the scopes required by this quickstart.
+     *
+     * If modifying these scopes, delete your previously saved credentials
+     * at ~/.credentials/drive-java-quickstart
+     */
+    public static final List<String> SCOPES =
+        Arrays.asList(DriveScopes.DRIVE_FILE);
+
     /** 
      * Unlimited count of items.
      */    
