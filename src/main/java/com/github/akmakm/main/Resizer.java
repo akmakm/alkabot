@@ -11,6 +11,7 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import javax.imageio.IIOException;
 import javax.imageio.ImageIO;
 
 /**
@@ -85,17 +86,14 @@ public class Resizer extends DefaultConsumer implements Runnable {
             if (!fileIn.canRead()) {
                 System.err.println("Resizer:  cannot read "+fileIn.getName());
             } else {
-                BufferedImage originalImage = ImageIO.read(fileIn);
-                int type = originalImage.getType() == 0 ? BufferedImage.TYPE_INT_ARGB
-                    : originalImage.getType();
                 BufferedImage resizedImageJpg = resizeImage(fileIn);
-            System.err.println("Resizer:  attempting ImageIO.write "
+                System.err.println("Resizer:  attempting ImageIO.write "
                     + "(resizedImageJpg=" + resizedImageJpg
                     + ", \"jpg\", fileOut=" + fileOut + ")");
                 ImageIO.write(resizedImageJpg, "jpg", fileOut);
                 resultSuccess = true;
             }
-        } catch (SecurityException ex1) {
+        } catch (SecurityException | IIOException ex1) {
             System.err.println("Resizer:  problem with accessing files or"
                     + "creating an images_resized folder, exception \""
                     + ex1.getMessage() + "\"");
@@ -121,8 +119,7 @@ public class Resizer extends DefaultConsumer implements Runnable {
      * Actual image resize action
      *
      */
-    private static BufferedImage resizeImage(//BufferedImage originalImage, int type) {
-            File fileIn) throws IOException {
+    private static BufferedImage resizeImage(File fileIn) throws IOException {
         BufferedImage originalImage = ImageIO.read(fileIn);
         int img_widthFull = originalImage.getWidth();
         int img_heightFull = originalImage.getHeight();
@@ -134,6 +131,9 @@ public class Resizer extends DefaultConsumer implements Runnable {
 
         int type = originalImage.getType() == 0 ? BufferedImage.TYPE_INT_ARGB
                  : originalImage.getType();
+        if (type == BufferedImage.TYPE_INT_RGB) {
+            type = BufferedImage.TYPE_3BYTE_BGR;
+        }
         // MAXDxMAXD is the desired bounding box of the scaled area
         BufferedImage resizedImage = new BufferedImage(MAXD, MAXD, type);
         Graphics2D g2Resize = resizedImage.createGraphics();

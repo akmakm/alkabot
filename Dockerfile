@@ -66,7 +66,7 @@ USER user
 # ================= Download bot.
 VOLUME "$USER_HOME_DIR/.m2"
 ENV PATH /usr/bin/akmakm/bot:$PATH
-RUN  git clone https://github.com/akmakm/bot 
+RUN git  clone https://github.com/akmakm/bot 
 
 # ================= Configure user's env, paths, scripts
 WORKDIR /usr/bin/akmakm/bot
