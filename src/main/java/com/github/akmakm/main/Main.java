@@ -254,12 +254,10 @@ public class Main {
                 .setDataStoreFactory(DATA_STORE_FACTORY)
                 .setAccessType("offline")
                 .build();
-        System.err.println("oau, scopes="+flow.getScopesAsString());
         // Read the authorization code from config
         String authorizationCode = config.get(CLOUD_USER_CODE);
-        if (authorizationCode != null) {
-            System.err.println("oau, code="+authorizationCode);
 
+        if (authorizationCode != null) {
             // Authorize the OAuth2 token
             GoogleAuthorizationCodeTokenRequest tokenRequest = flow
                     .newTokenRequest(authorizationCode);
@@ -267,14 +265,10 @@ public class Main {
                     .getInstalled()
                     .getRedirectUris()
                     .get(0));
-            System.err.println("oau, uri 0="+clientSecrets
-                    .getInstalled()
-                    .getRedirectUris()
-                    .get(0));
+
             try {
                 GoogleTokenResponse tokenResponse = tokenRequest.execute();
                 // Create the OAuth2 credential
-                System.err.println("oau, token="+tokenResponse.toString());
                 credential = new GoogleCredential
                         .Builder().setTransport(HTTP_TRANSPORT)
                         .setJsonFactory(JSON_FACTORY)
