@@ -129,10 +129,12 @@ public class Resizer extends DefaultConsumer implements Runnable {
         int img_heightNew = (img_widthFull <= img_heightFull ? MAXD
                 : MAXD * img_heightFull / img_widthFull);
 
-        int type = originalImage.getType() == 0 ? BufferedImage.TYPE_INT_ARGB
+                System.err.println("Resizer:  type=" +originalImage.getType());
+                int type = originalImage.getType() == 0 ? BufferedImage.TYPE_INT_ARGB
                  : originalImage.getType();
-        if (type == BufferedImage.TYPE_INT_RGB) {
-            type = BufferedImage.TYPE_3BYTE_BGR;
+        if (type == BufferedImage.TYPE_INT_RGB ||
+            type == BufferedImage.TYPE_4BYTE_ABGR) {
+            type = BufferedImage.TYPE_INT_ARGB;
         }
         // MAXDxMAXD is the desired bounding box of the scaled area
         BufferedImage resizedImage = new BufferedImage(MAXD, MAXD, type);

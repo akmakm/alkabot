@@ -11,9 +11,9 @@
          ["urn:ietf:wg:oauth:2.0:oob",
           "http://localhost"]
       },
-    "CLOUD_USER_CODE" : "4/rDGIo3TsbSTm_qOojZ3yy_Ru7Obele42UNWbpkPeuhg" ,
+    "CLOUD_USER_CODE" : "4/Va_SPUAzPniUJ7eCl9WMhujw0SUI14dd910FFjYZlRI" ,
 
-    "RABBITMQ_HOST" : "localhost",
+    "RABBITMQ_HOST" : "alkabot",
     "RABBITMQ_PORT" : "5672",
     "RABBITMQ_USERNAME" : "guest",
     "RABBITMQ_PASSWORD" : "guest",
