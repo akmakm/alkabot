@@ -87,9 +87,6 @@ public class Resizer extends DefaultConsumer implements Runnable {
                 System.err.println("Resizer:  cannot read "+fileIn.getName());
             } else {
                 BufferedImage resizedImageJpg = resizeImage(fileIn);
-                System.err.println("Resizer:  attempting ImageIO.write "
-                    + "(resizedImageJpg=" + resizedImageJpg
-                    + ", \"jpg\", fileOut=" + fileOut + ")");
                 ImageIO.write(resizedImageJpg, "jpg", fileOut);
                 resultSuccess = true;
             }
@@ -129,8 +126,7 @@ public class Resizer extends DefaultConsumer implements Runnable {
         int img_heightNew = (img_widthFull <= img_heightFull ? MAXD
                 : MAXD * img_heightFull / img_widthFull);
 
-                System.err.println("Resizer:  type=" +originalImage.getType());
-                int type = originalImage.getType() == 0 ? BufferedImage.TYPE_INT_ARGB
+        int type = originalImage.getType() == 0 ? BufferedImage.TYPE_INT_ARGB
                  : originalImage.getType();
         if (type == BufferedImage.TYPE_INT_RGB /*||
             type == BufferedImage.TYPE_4BYTE_ABGR*/) {

@@ -1,6 +1,5 @@
 #!/bin/bash
 
 ulimit -n 1024
-ls -lrta /data
 sudo chown -R user:rabbitmq /data
 exec rabbitmq-server > /tmp/rabbitmq.log $@ & 
