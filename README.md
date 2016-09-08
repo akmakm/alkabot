@@ -27,9 +27,9 @@ for initialization.
  
 # Configuration
 For offline authorisation on your google drive, open this URL in your browser:
-https://accounts.google.com/o/oauth2/auth?access_type=offline&client_id=206335124163-jcest0gjch200lm7lg8ccuf6eao0vap1.apps.googleusercontent.com&response_type=code&redirect_uri=urn:ietf:wg:oauth:2.0:oob&scope=https://www.googleapis.com/auth/drive.file
+https://accounts.google.com/o/oauth2/auth?access_type=offline&client_id=206335124163-jcest0gjch200lm7lg8ccuf6eao0vap1.apps.googleusercontent.com&response_type=code&redirect_uri=urn:ietf:wg:oauth:2.0:oob&scope=https://www.googleapis.com/auth/drive.file,
 then login to your account, confirm the requested access rights for 'bot', and
-pick up the code generated for you. In 'alkabot.json' file put this this value to 
+pick up the code generated for you. In 'alkabot.json' file put this value to 
     "CLOUD_USER_CODE" : "<your code>"
 
 If used with other than default RabbitMQ, specify its connection 

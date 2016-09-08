@@ -13,7 +13,7 @@
       },
     "CLOUD_USER_CODE" : "4/pV9xjqssMpHTty6zAQFLi8qHDnVXRBIoJd4y6W-lN7U" ,
 
-    "RABBITMQ_HOST" : "alkabot",
+    "RABBITMQ_HOST" : "localhost",
     "RABBITMQ_PORT" : "5672",
     "RABBITMQ_USERNAME" : "guest",
     "RABBITMQ_PASSWORD" : "guest",
