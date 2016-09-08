@@ -66,7 +66,7 @@ USER user
 # ================= Download bot.
 VOLUME "$USER_HOME_DIR/.m2"
 ENV PATH /usr/bin/akmakm/bot:$PATH
-RUN git clone https://github.com/akmakm/bot 
+RUN git clone https://github.com/akmakm/bot
 
 # ================= Configure user's env, paths, scripts
 WORKDIR /usr/bin/akmakm/bot
@@ -88,8 +88,3 @@ RUN mvn package
 # ================= Configure bash and RabbitMQ to run in the container
 CMD ["bash", "--rcfile", "/tmp/rabbitmq-start"]
 EXPOSE 15671 15672 5672 36438
-
-#chown: changing ownership of ‘/data/log’: Operation not permitted
-#chown: changing ownership of ‘/data/mnesia’: Operation not permitted
-#chown: changing ownership of ‘/data’: Operation not permitted
-#bash: rabbitmq.log: Permission denied

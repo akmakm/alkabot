@@ -247,7 +247,7 @@ public class Main {
         InputStream in = new FileInputStream(configFile);
         GoogleClientSecrets clientSecrets =
             GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
-        Credential credential;
+        Credential credential=null;
         GoogleAuthorizationCodeFlow flow =
                 new GoogleAuthorizationCodeFlow.Builder(
                         HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
@@ -271,17 +271,24 @@ public class Main {
                     .getInstalled()
                     .getRedirectUris()
                     .get(0));
-            GoogleTokenResponse tokenResponse = tokenRequest.execute();
-            // Create the OAuth2 credential
-            System.err.println("oau, token="+tokenResponse.toString());
-            credential = new GoogleCredential
-                    .Builder().setTransport(HTTP_TRANSPORT)
-                    .setJsonFactory(JSON_FACTORY)
-                    .setClientSecrets(clientSecrets)
-                    .build();
-            // Set authorized credentials
-            credential.setFromTokenResponse(tokenResponse);
-        } else {
+            try {
+                GoogleTokenResponse tokenResponse = tokenRequest.execute();
+                // Create the OAuth2 credential
+                System.err.println("oau, token="+tokenResponse.toString());
+                credential = new GoogleCredential
+                        .Builder().setTransport(HTTP_TRANSPORT)
+                        .setJsonFactory(JSON_FACTORY)
+                        .setClientSecrets(clientSecrets)
+                        .build();
+                // Set authorized credentials
+                credential.setFromTokenResponse(tokenResponse);
+            } catch (IOException ex) {
+                System.err.println("Failed to get authorisation for the code: "
+                        + authorizationCode);
+                authorizationCode = null;
+            }
+        } 
+        if (authorizationCode == null)  {
             LocalServerReceiver localReceiver = 
                 new LocalServerReceiver.Builder().setPort(36438).build();
             credential = new AuthorizationCodeInstalledApp(
